@@ -1,0 +1,15 @@
+{
+  "name": "built-with-nanoodle",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Showcase of apps built with nanoodle — not published to npm; package.json exists only to run the link checker.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": "github:nanoodlecom/built-with-nanoodle",
+  "license": "MIT"
+}
