@@ -1,13 +1,15 @@
 # built-with-nanoodle 🍜✨
 
-**Apps people shipped with [nanoodle](https://nanoodle.com).** Every entry is
-a working app — built visually as a node graph, turned into an app with
-✨ Create app, and shared as a link that carries the whole thing inside it.
-Click "Try it" on any entry and the app opens in your browser, runs on *your*
-own NanoGPT key, and uploads nothing anywhere.
+**Ship an app with [nanoodle](https://nanoodle.com) and it belongs on this
+list.** Everything on it so far is one of ours, so the first app that isn't
+gets an empty shelf to itself. Each entry is a working app: built visually as a
+node graph, turned into an app with ✨ Create app, and shared as a link that
+carries the whole thing inside it. Click "Try it" on any entry and the app
+opens in your browser, runs on *your* own NanoGPT key, and uploads nothing
+anywhere.
 
-Shipped something with nanoodle? [Add it](CONTRIBUTING.md) — exported
-single-file apps, remixes, and tiny weekend hacks all count.
+Made something? [Add it](CONTRIBUTING.md) — exported single-file apps, remixes,
+and tiny weekend hacks all count.
 
 ## Apps
 
@@ -65,12 +67,19 @@ linked from its description.
 
 `npm test` reads every "Try it" entry in this README and decodes it: each one
 has to be a full-length `#a=` share link that unpacks into a well-formed app
-payload (`v`, `graph.nodes`). A placeholder or a shortened link fails. It needs
-no network, so you can run it before you open the PR.
+payload (`v`, `graph.nodes`). A placeholder or a shortened link fails, and so
+does a real link pasted *inside* the template's code fence instead of under it.
+It also checks that every relative link in this file and in CONTRIBUTING.md —
+`CONTRIBUTING.md`, `LICENSE` — is a file that exists. None of that touches the
+network, so you can run it before you open the PR.
 
-CI runs that plus one more check it cannot: `scripts/check-urls.mjs` resolves
-every other link on this page and fails on a dead one — weekly as well as on
-each PR, because a page we point at can 404 without us touching a thing.
+CI runs that plus the one check it cannot: `scripts/check-urls.mjs` fetches
+every http link in this file and in CONTRIBUTING.md and fails on a dead one. It
+runs weekly as well as on each PR, because a page we point at can 404 without
+us touching a thing. The "edit this README on GitHub" link is resolved through
+its `blob` URL — the `edit` page sends a signed-out visitor to the login form,
+which answers 200 for any path at all, so fetching it directly would prove
+nothing.
 
 Links are only verified to *load* — quality judgments happen in PR review, by
 humans.

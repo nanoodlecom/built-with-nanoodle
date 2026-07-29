@@ -21,7 +21,8 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       # Link checker only — zero npm deps, no network: it decodes every
-      # "Try it" #a= link in README.md and checks the app payload shape.
+      # "Try it" #a= link in README.md, checks the app payload shape, and
+      # checks that every relative link in both files exists on disk.
       - run: npm test
 
   urls:
@@ -31,7 +32,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # The network half: resolves every http URL in README.md and
+      # The network half: fetches every http URL in README.md and
       # CONTRIBUTING.md and fails on a non-200, naming the dead URL. This is
       # what catches an awesome-noodles rename turning a graph link into a 404.
+      # It repeats the offline relative-link check too, so one command covers
+      # every link on both pages.
       - run: node scripts/check-urls.mjs

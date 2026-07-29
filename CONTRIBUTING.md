@@ -19,9 +19,11 @@ first one in the list.
    If the app also lives somewhere as an exported `.html` (your site, a
    gist, a Pages deploy), link it at the end of the description.
 4. **Run `npm test`** — it decodes every Try-it link and checks it's a valid
-   app payload. A placeholder or a shortened link fails there, not in review.
-   If you edited in the browser, CI runs the same check on your PR, and also
-   resolves every other link on the page.
+   app payload. A placeholder, a shortened link, or a real link left inside the
+   template's code fence fails there, not in review. It also checks the
+   relative links in the README and in this file. If you edited in the browser,
+   CI runs the same check on your PR, plus `scripts/check-urls.mjs`, which
+   fetches every http link in both files and fails on a dead one.
 
 Rules:
 
