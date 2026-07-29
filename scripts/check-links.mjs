@@ -1,11 +1,18 @@
-// Decode every "Try it" app link in README.md and verify it is a well-formed
-// nanoodle app payload. Zero dependencies, Node >= 20.
+// Check every "Try it" entry in README.md. Zero dependencies, no network, Node >= 20.
 //
-//   #a=<base64url(gzip(app JSON))>   |   #a=u<base64url(app JSON)>
+//   https://nanoodle.com/play#a=<base64url(gzip(app JSON))>
+//   https://nanoodle.com/play#a=u<base64url(app JSON)>      (uncompressed fallback)
 //
-// "Well-formed" means: an object with v === 1 and a graph carrying a nodes
-// array — the same floor the play.html boot importer requires. Links are only
-// verified to decode; whether an app is *good* is PR review's job.
+// EVERY [Try it](…) target is an entry, not only the ones that already look like an
+// app link. A shortened link, the README template's "paste your #a= link here"
+// placeholder, or a bare URL with no payload is a problem to report — a checker that
+// silently skips what it cannot parse tells a contributor their entry passed when
+// nothing looked at it. Fenced code blocks are stripped first, so the template in the
+// README is not read as an entry.
+//
+// "Well-formed" means: an object with v === 1 and a graph carrying a nodes array —
+// the same floor the play.html boot importer requires. Links are only verified to
+// decode; whether an app is *good* is PR review's job.
 
 import { readFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
@@ -13,7 +20,18 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const README = join(dirname(fileURLToPath(import.meta.url)), "..", "README.md");
-const LINK_RE = /\[Try it\]\((https:\/\/nanoodle\.com\/play#a=(u?)([A-Za-z0-9_-]+))\)/g;
+
+const TRY_RE = /\[Try it\]\(([^)]*)\)/g;
+// The link nanoodle's 🔗 Share button copies. www. and the /play.html form are the
+// same page, so both are accepted and decoded like any other entry.
+const APP_RE = /^https:\/\/(?:www\.)?nanoodle\.com\/play(?:\.html)?#a=(u?)([A-Za-z0-9_-]+)$/;
+const PLACEHOLDER_RE = /^$|paste your|<share link>|your #a= link/i;
+const FENCE_RE = /^```[^\n]*\n[\s\S]*?^```[^\n]*$/gm;
+
+/** Drop fenced code blocks — the README's own entry template lives in one. */
+export function stripFences(text) {
+  return text.replace(FENCE_RE, "");
+}
 
 export function decodeAppLink(tag, payload) {
   const bytes = Buffer.from(payload, "base64url");
@@ -24,12 +42,27 @@ export function decodeAppLink(tag, payload) {
 export function checkReadme(text = readFileSync(README, "utf8")) {
   const problems = [];
   let count = 0;
-  for (const [, link, tag, payload] of text.matchAll(LINK_RE)) {
+  for (const [, target] of stripFences(text).matchAll(TRY_RE)) {
     count++;
-    const where = link.slice(0, 60) + "…";
+    const raw = target.trim();
+    const where = (raw.length > 60 ? raw.slice(0, 60) + "…" : raw) || "(empty link)";
+
+    if (PLACEHOLDER_RE.test(raw)) {
+      problems.push(`${where}: still the template placeholder — paste the real share link here`);
+      continue;
+    }
+    const m = APP_RE.exec(raw);
+    if (!m) {
+      problems.push(
+        `${where}: not a nanoodle app link — a Try-it link must be the full-length ` +
+        `https://nanoodle.com/play#a=… link that 🔗 Share copies (a shortened link hides the payload)`,
+      );
+      continue;
+    }
+
     let app;
     try {
-      app = decodeAppLink(tag, payload);
+      app = decodeAppLink(m[1], m[2]);
     } catch (e) {
       problems.push(`${where}: does not decode (${e.message})`);
       continue;

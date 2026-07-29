@@ -3,6 +3,11 @@ name: test
 on:
   push:
   pull_request:
+  # An upstream rename breaks a link here with no commit of ours to trigger on,
+  # so the URL job also runs on its own once a week.
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
 
 jobs:
   test:
@@ -18,3 +23,15 @@ jobs:
       # Link checker only — zero npm deps, no network: it decodes every
       # "Try it" #a= link in README.md and checks the app payload shape.
       - run: npm test
+
+  urls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # The network half: resolves every http URL in README.md and
+      # CONTRIBUTING.md and fails on a non-200, naming the dead URL. This is
+      # what catches an awesome-noodles rename turning a graph link into a 404.
+      - run: node scripts/check-urls.mjs

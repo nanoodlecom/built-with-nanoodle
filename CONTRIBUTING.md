@@ -19,8 +19,9 @@ first one in the list.
    If the app also lives somewhere as an exported `.html` (your site, a
    gist, a Pages deploy), link it at the end of the description.
 4. **Run `npm test`** — it decodes every Try-it link and checks it's a valid
-   app payload. If you edited in the browser, CI runs the same check on your
-   PR.
+   app payload. A placeholder or a shortened link fails there, not in review.
+   If you edited in the browser, CI runs the same check on your PR, and also
+   resolves every other link on the page.
 
 Rules:
 
