@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { readFileSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
@@ -84,6 +84,34 @@ test("relative links in both files point at files that exist", () => {
   writeFileSync(join(dir, "R.md"), "[gone](GONE.md) [here](R.md) [anchor](#x) [mail](mailto:a@b.c)\n");
   assert.deepEqual(deadRelativeLinks(dir, ["R.md"]).map((d) => d.target), ["GONE.md"]);
   rmSync(dir, { recursive: true, force: true });
+});
+
+test("fences close with a longer marker, survive CRLF, and reject invalid backtick info", () => {
+  const real = link(`https://nanoodle.com/play#a=${gz(APP)}`);
+  for (const newline of ["\n", "\r\n"]) {
+    for (const marker of ["`", "~"]) {
+      const text = [marker.repeat(3), link("paste your #a= link here"), marker.repeat(4), real, ""].join(newline);
+      assert.deepEqual(checkReadme(text), { count: 1, problems: [] });
+    }
+  }
+  // A shorter or different-character fence cannot leave the fenced state.
+  for (const close of ["```", "~~~~"]) {
+    assert.equal(checkReadme(`\`\`\`\`\n${close}\n${real}\n`).count, 0);
+  }
+  assert.equal(checkReadme(`\`\`\`bad\`info\n${real}\n`).count, 1);
+});
+
+test("relative links resolve from the source directory and decode URL filenames", () => {
+  const dir = mkdtempSync(join(tmpdir(), "bwn-relative-"));
+  try {
+    mkdirSync(join(dir, "docs"));
+    writeFileSync(join(dir, "README.md"), "root");
+    writeFileSync(join(dir, "docs", "a b.md"), "destination");
+    writeFileSync(join(dir, "docs", "guide.md"), "[root](../README.md) [space](a%20b.md#part) [gone](gone.md)\n");
+    assert.deepEqual(deadRelativeLinks(dir, ["docs/guide.md"]).map((d) => d.target), ["docs/gone.md"]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 // An anonymous fetch of a github /edit/ URL 302s to the login form, which answers 200
