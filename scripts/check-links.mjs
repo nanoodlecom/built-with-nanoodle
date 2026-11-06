@@ -31,11 +31,6 @@ const TRY_RE = /\[Try it\]\(([^)]*)\)/g;
 // same page, so both are accepted and decoded like any other entry.
 const APP_RE = /^https:\/\/(?:www\.)?nanoodle\.com\/play(?:\.html)?#a=(u?)([A-Za-z0-9_-]+)$/;
 const PLACEHOLDER_RE = /^$|paste your|<share link>|your #a= link/i;
-// CommonMark fences: ``` or ~~~, 3 or more of the character, indented up to 3 spaces,
-// closed by the same character. CONTRIBUTING.md indents its fences under a list item,
-// so a column-0-only pattern would miss that style the day it reaches README.md. An
-// unclosed fence runs to the end of the file, which is what CommonMark does too.
-const FENCE_RE = /^ {0,3}(`{3,}|~{3,})[^\n]*\n([\s\S]*?)(?:^ {0,3}\1[ \t]*$|$(?![\s\S]))/gm;
 
 /**
  * Split the text into the prose outside fenced code blocks and the text inside them.
@@ -43,12 +38,26 @@ const FENCE_RE = /^ {0,3}(`{3,}|~{3,})[^\n]*\n([\s\S]*?)(?:^ {0,3}\1[ \t]*$|$(?!
  * but the fenced text is handed back, not thrown away, so nothing hides in there.
  */
 export function splitFences(text) {
+  const prose = [];
   const fenced = [];
-  const prose = text.replace(FENCE_RE, (block, _marker, body) => {
-    fenced.push(body ?? "");
-    return "";
-  });
-  return { prose, fenced: fenced.join("\n") };
+  let closing = null;
+  for (const line of text.match(/[^\n]*\n|[^\n]+$/g) || []) {
+    const content = line.replace(/\r?\n$/, "");
+    if (closing) {
+      if (closing.test(content)) closing = null;
+      else fenced.push(line);
+      continue;
+    }
+    const opening = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(content);
+    // Backtick fences cannot have backticks in their info string. A closing
+    // fence uses the same character and AT LEAST the opening marker's length.
+    if (opening && !(opening[1][0] === "`" && opening[2].includes("`"))) {
+      closing = new RegExp(`^ {0,3}${opening[1][0]}{${opening[1].length},}[ \\t]*$`);
+      prose.push("\n");
+      fenced.push("\n");
+    } else prose.push(line);
+  }
+  return { prose: prose.join(""), fenced: fenced.join("") };
 }
 
 /** Drop fenced code blocks — the README's own entry template lives in one. */

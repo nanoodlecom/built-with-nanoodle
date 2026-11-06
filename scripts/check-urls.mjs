@@ -66,8 +66,10 @@ export function collectRelativeLinks(root = ROOT, files = FILES) {
   const found = new Map();
   for (const file of files) {
     for (const [, raw] of readFileSync(join(root, file), "utf8").matchAll(MD_LINK_RE)) {
-      const target = raw.split("#")[0];
+      let target = raw.split(/[?#]/)[0];
       if (!target || /^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith("/")) continue;
+      try { target = decodeURIComponent(target); } catch { /* Report the literal malformed target as missing. */ }
+      target = normalize(join(dirname(file), target));
       if (!found.has(target)) found.set(target, new Set());
       found.get(target).add(file);
     }
@@ -82,12 +84,16 @@ export function deadRelativeLinks(root = ROOT, files = FILES) {
   );
 }
 
-async function resolve(url) {
+export async function resolveUrl(url, {
+  fetchUrl = fetch,
+  delay = (ms) => new Promise((r) => setTimeout(r, ms)),
+} = {}) {
   let last = "";
   for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
     try {
-      const res = await fetch(url, { redirect: "follow", signal: AbortSignal.timeout(TIMEOUT_MS) });
-      res.body?.cancel().catch(() => {});
+      const res = await fetchUrl(url, { redirect: "follow", signal: AbortSignal.timeout(TIMEOUT_MS) });
+      // Release the response before either returning or starting another attempt.
+      await res.body?.cancel().catch(() => {});
       // A redirect to a sign-in form is not proof the target is alive — it is proof we
       // were never shown it. Treat it as dead rather than as a green 200.
       if (/^https:\/\/github\.com\/(login|session)\b/.test(res.url)) {
@@ -100,7 +106,7 @@ async function resolve(url) {
     } catch (e) {
       last = e.name === "TimeoutError" ? `timed out after ${TIMEOUT_MS / 1000}s` : e.message;
     }
-    if (attempt < ATTEMPTS) await new Promise((r) => setTimeout(r, attempt * 2000));
+    if (attempt < ATTEMPTS) await delay(attempt * 2000);
   }
   return { ok: false, status: last };
 }
@@ -119,7 +125,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const targets = collectUrls();
   for (const { url, where } of targets) {
     const { url: request, note } = requestTarget(url);
-    const { ok, status } = await resolve(request);
+    const { ok, status } = await resolveUrl(request);
     console.log(`${ok ? "ok  200" : "DEAD " + status}  ${url}${note ? `  [${note}]` : ""}`);
     if (!ok) dead.push(`${status}  ${request}  (linked from ${where})`);
   }
