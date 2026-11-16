@@ -17,6 +17,18 @@ test("every Try-it link in the README decodes to a valid app payload", () => {
   assert.deepEqual(problems, []);
 });
 
+test("the three graph downloads match the workflows in their Try-it links", () => {
+  const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+  const pairs = [...readme.matchAll(/\[Try it\]\(https:\/\/nanoodle\.com\/play#a=(u?)([\w-]+)\) · \[graph JSON\]\((graphs\/[^)]+)\)/g)];
+  const expected = ["image-model-arena", "photo-to-video", "sing"]
+    .map((name) => `graphs/${name}.noodle-graph.json`);
+  assert.deepEqual(pairs.map(([, , , path]) => path).filter((path) => expected.includes(path)).sort(), expected);
+  for (const [, tag, payload, path] of pairs) {
+    const graph = JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), "utf8"));
+    assert.deepEqual(graph, decodeAppLink(tag, payload).graph, path);
+  }
+});
+
 test("checker catches junk payloads", () => {
   const app = (p) => link(`https://nanoodle.com/play#a=${p}`);
   const bad = [
@@ -140,10 +152,6 @@ test("collectUrls finds every http URL in both files, fragment stripped and dedu
   assert.ok(urls.every((u) => !u.includes("#")), "fragments stripped");
   assert.ok(urls.includes("https://nanoodle.com/play"), "the 5 app links collapse to one page");
   assert.ok(urls.includes("https://github.com/nanoodlecom/awesome-noodles"));
-  assert.ok(
-    urls.some((u) => u.endsWith("/graphs/image-model-arena.noodle-graph.json")),
-    "the gallery graph links are covered — a rename is exactly what this job catches",
-  );
   const contributing = collectUrls().find((u) => u.url === "https://nanoodle.com");
   assert.match(contributing.where, /CONTRIBUTING\.md/, "CONTRIBUTING.md is scanned too");
 });

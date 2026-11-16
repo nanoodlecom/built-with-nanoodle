@@ -1,0 +1,87 @@
+{
+  "v": 1,
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "text",
+      "x": 60,
+      "y": 60,
+      "fields": {
+        "text": "Write a wistful 90s trip-hop track. Repeat the hook."
+      }
+    },
+    {
+      "id": "n2",
+      "type": "llm",
+      "x": 340,
+      "y": 20,
+      "fields": {
+        "system": "You are a songwriter. Write only the lyrics — no title, no commentary."
+      }
+    },
+    {
+      "id": "n3",
+      "type": "llm",
+      "x": 620,
+      "y": 260,
+      "fields": {
+        "system": "You invent a musical style that fits the given lyrics. Reply with only the style, richly descriptive — no commentary."
+      }
+    },
+    {
+      "id": "n4",
+      "type": "music",
+      "x": 900,
+      "y": 60,
+      "fields": {
+        "instrumental": false
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "l1",
+      "from": {
+        "node": "n1",
+        "port": "text"
+      },
+      "to": {
+        "node": "n2",
+        "port": "prompt"
+      }
+    },
+    {
+      "id": "l2",
+      "from": {
+        "node": "n2",
+        "port": "text"
+      },
+      "to": {
+        "node": "n4",
+        "port": "lyrics"
+      }
+    },
+    {
+      "id": "l3",
+      "from": {
+        "node": "n2",
+        "port": "text"
+      },
+      "to": {
+        "node": "n3",
+        "port": "prompt"
+      }
+    },
+    {
+      "id": "l4",
+      "from": {
+        "node": "n3",
+        "port": "text"
+      },
+      "to": {
+        "node": "n4",
+        "port": "prompt"
+      }
+    }
+  ]
+}
