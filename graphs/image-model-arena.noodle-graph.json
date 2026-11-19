@@ -1,0 +1,109 @@
+{
+  "v": 1,
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "comment",
+      "x": 60,
+      "y": 40,
+      "fields": {
+        "text": "🥊 Model arena: one prompt, four image models, judged side by side. Hit Run — or swap any contender's model in Settings first."
+      }
+    },
+    {
+      "id": "n2",
+      "type": "text",
+      "x": 60,
+      "y": 300,
+      "fields": {
+        "text": "a tiny dragon curled up asleep in a teacup, macro photo, soft morning light"
+      }
+    },
+    {
+      "id": "n3",
+      "type": "image",
+      "x": 460,
+      "y": 60,
+      "fields": {
+        "model": "gpt-image-2"
+      },
+      "name": "Contender 1"
+    },
+    {
+      "id": "n4",
+      "type": "image",
+      "x": 460,
+      "y": 240,
+      "fields": {
+        "model": "nano-banana-2-fast"
+      },
+      "name": "Contender 2"
+    },
+    {
+      "id": "n5",
+      "type": "image",
+      "x": 460,
+      "y": 420,
+      "fields": {
+        "model": "qwen-image-3"
+      },
+      "name": "Contender 3"
+    },
+    {
+      "id": "n6",
+      "type": "image",
+      "x": 460,
+      "y": 600,
+      "fields": {
+        "model": "wavespeed-ai/krea-v2-large/text-to-image"
+      },
+      "name": "Contender 4"
+    }
+  ],
+  "links": [
+    {
+      "id": "l1",
+      "from": {
+        "node": "n2",
+        "port": "text"
+      },
+      "to": {
+        "node": "n3",
+        "port": "prompt"
+      }
+    },
+    {
+      "id": "l2",
+      "from": {
+        "node": "n2",
+        "port": "text"
+      },
+      "to": {
+        "node": "n4",
+        "port": "prompt"
+      }
+    },
+    {
+      "id": "l3",
+      "from": {
+        "node": "n2",
+        "port": "text"
+      },
+      "to": {
+        "node": "n5",
+        "port": "prompt"
+      }
+    },
+    {
+      "id": "l4",
+      "from": {
+        "node": "n2",
+        "port": "text"
+      },
+      "to": {
+        "node": "n6",
+        "port": "prompt"
+      }
+    }
+  ]
+}

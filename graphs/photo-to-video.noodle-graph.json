@@ -1,0 +1,54 @@
+{
+  "v": 1,
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "text",
+      "x": 60,
+      "y": 120,
+      "fields": {
+        "text": "a tiny sailboat on a glowing bioluminescent sea, night, stars"
+      }
+    },
+    {
+      "id": "n2",
+      "type": "image",
+      "x": 400,
+      "y": 100,
+      "fields": {}
+    },
+    {
+      "id": "n3",
+      "type": "ivideo",
+      "x": 740,
+      "y": 100,
+      "fields": {
+        "prompt": "slow push-in, gentle waves, camera drifts forward"
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "l1",
+      "from": {
+        "node": "n1",
+        "port": "text"
+      },
+      "to": {
+        "node": "n2",
+        "port": "prompt"
+      }
+    },
+    {
+      "id": "l2",
+      "from": {
+        "node": "n2",
+        "port": "image"
+      },
+      "to": {
+        "node": "n3",
+        "port": "image"
+      }
+    }
+  ]
+}
