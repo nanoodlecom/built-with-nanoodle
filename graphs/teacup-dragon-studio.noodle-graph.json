@@ -1,0 +1,37 @@
+{
+  "v": 1,
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "text",
+      "x": 60,
+      "y": 120,
+      "fields": {
+        "text": "a tiny dragon curled up asleep in a teacup, macro photo, soft morning light"
+      }
+    },
+    {
+      "id": "n2",
+      "type": "image",
+      "x": 420,
+      "y": 100,
+      "fields": {
+        "model": "kling-image-v4",
+        "size": "2048x2048"
+      }
+    }
+  ],
+  "links": [
+    {
+      "id": "l1",
+      "from": {
+        "node": "n1",
+        "port": "text"
+      },
+      "to": {
+        "node": "n2",
+        "port": "prompt"
+      }
+    }
+  ]
+}
