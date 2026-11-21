@@ -16,7 +16,8 @@
       "x": 340,
       "y": 20,
       "fields": {
-        "system": "You are a songwriter. Write only the lyrics — no title, no commentary."
+        "system": "You are a songwriter. Write only the lyrics — no title, no commentary.",
+        "model": "z-ai/glm-5.3-flash"
       }
     },
     {
@@ -25,7 +26,8 @@
       "x": 620,
       "y": 260,
       "fields": {
-        "system": "You invent a musical style that fits the given lyrics. Reply with only the style, richly descriptive — no commentary."
+        "system": "You invent a musical style that fits the given lyrics. Reply with only the style, richly descriptive — no commentary.",
+        "model": "z-ai/glm-5.3-flash"
       }
     },
     {
@@ -34,7 +36,9 @@
       "x": 900,
       "y": 60,
       "fields": {
-        "instrumental": false
+        "instrumental": false,
+        "model": "minimax/music-3",
+        "response_format": "mp3"
       }
     }
   ],
