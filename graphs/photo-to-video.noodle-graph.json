@@ -15,7 +15,10 @@
       "type": "image",
       "x": 400,
       "y": 100,
-      "fields": {}
+      "fields": {
+        "model": "meta/muse-image/text-to-image",
+        "size": "16:9"
+      }
     },
     {
       "id": "n3",
@@ -23,7 +26,10 @@
       "x": 740,
       "y": 100,
       "fields": {
-        "prompt": "slow push-in, gentle waves, camera drifts forward"
+        "prompt": "slow push-in, gentle waves, camera drifts forward",
+        "model": "minimax-h3-singularity/image-to-video",
+        "resolution": "480p",
+        "duration": "5"
       }
     }
   ],
